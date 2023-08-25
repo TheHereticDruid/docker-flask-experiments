@@ -1,0 +1,60 @@
+<div id="chat_box" style="height:75%;width:100%;overflow:auto;"></div>
+<input id="input_text" style="height: 10%; width: 75%;"></input>
+<button id="submit" onclick="generate_response()">Submit</button>
+
+<script>
+
+    function onHitEnter(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            generate_response();
+        }
+    }
+    
+    function generate_response() {
+        var input_text = document.getElementById("input_text");
+        var request_query=input_text.value;
+        if (!request_query || !request_query.length) {
+            return;
+        }
+        input_text.removeEventListener("keypress", onHitEnter);
+        var input_button = document.getElementById("submit");
+        input_button.removeEventListener("click", generate_response);
+        input_text.value="";
+        var div=document.getElementById('chat_box');
+        var inner_div=document.createElement("div");
+        inner_div.style="width:90%;text-align:left;float:left";
+        var request_text=document.createTextNode("User: "+request_query);
+        inner_div.appendChild(request_text);
+        div.appendChild(inner_div);
+        div.appendChild(document.createElement("br"));
+        inner_div=document.createElement("div");
+        inner_div.style="width:90%;text-align:left;float:left";
+        response_text=document.createTextNode("Bot is thinking...");
+        inner_div.appendChild(response_text);
+        div.appendChild(inner_div);
+        div.appendChild(document.createElement("br"));
+        var xhr = new XMLHttpRequest();
+        var params = 'query_text='+request_query;
+        xhr.open('POST', "/response", true);
+        xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        xhr.onreadystatechange = function() {
+            if(xhr.readyState == 4) {
+                if(xhr.status == 200){
+                    response_text.nodeValue="Bot: "+xhr.responseText;
+                }
+                else {
+                    alert("The server returned an error, please check the log");
+                    response_text.nodeValue="Bot threw an error";
+                }
+                input_text.addEventListener("keypress", onHitEnter);
+                input_button.addEventListener("click", generate_response);
+            }
+           
+        }
+        xhr.send(params);
+    }
+    var input_text = document.getElementById("input_text");
+
+    input_text.addEventListener("keypress", onHitEnter);
+</script>
